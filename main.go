@@ -1,20 +1,11 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
-)
-
-const (
-	GRID_SIZE  int = 20
-	MAX_WIDTH  int = 110
-	MAX_HEIGHT int = 480
 )
 
 type Game struct {
@@ -22,35 +13,17 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	// log.Printf("FPS: %.2f\n", ebiten.ActualFPS())
-	if ebiten.IsWindowBeingClosed() {
-		log.Println("Game was closed")
-		return errors.New("Game was closed")
-	}
+	log.Printf("FPS: %.2f\n", ebiten.ActualFPS())
 
-	// keys := []any{ebiten.KeyArrowDown, ebiten.KeyArrowLeft}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) {
-		log.Println("Up arrow pressed!")
+	if err := handleClose(); err != nil {
+		return err
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) {
-		log.Println("Down arrow pressed!")
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
-		log.Println("Left arrow pressed!")
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
-		log.Println("Right arrow pressed!")
+	if err := handleKeyArrowsInput(g); err != nil {
+		return err
 	}
 
 	return nil
 }
-
-const (
-	WELCOME_TEXT           = "Welcome to Snake2D"
-	WELCOME_TEXT_WIDTH int = 110
-	WELCOME_TEXT_X     int = (MAX_WIDTH - WELCOME_TEXT_WIDTH) / 2
-	WELCOME_TEXT_Y     int = 10
-)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, WELCOME_TEXT, WELCOME_TEXT_X, WELCOME_TEXT_Y)
@@ -59,7 +32,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			screen, float32(c.x*GRID_SIZE), float32(c.y*GRID_SIZE),
 			float32(GRID_SIZE), float32(GRID_SIZE), g.snake.color, true,
 		)
-		fmt.Printf("%f %f %f\n", float32(c.x*GRID_SIZE), float32(c.y*GRID_SIZE), float32(GRID_SIZE))
 	}
 }
 
