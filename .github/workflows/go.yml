@@ -23,7 +23,7 @@ jobs:
 
     - name: Build
       run: |
-        sudo apt install -y libx11-dev
+        sudo apt install -y libx11-dev libxrandr-dev
         go build -v ./...
 
     - name: Test
