@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -17,23 +18,25 @@ func handleClose() error {
 	return nil
 }
 
+var keyDirections map[ebiten.Key]Direction = map[ebiten.Key]Direction{
+	ebiten.KeyArrowUp:    UP,
+	ebiten.KeyArrowDown:  DOWN,
+	ebiten.KeyArrowLeft:  LEFT,
+	ebiten.KeyArrowRight: RIGHT,
+}
+
 // Handles user input of key arrows by calculating new
 // coordinates for head of the snake and removing its tail.
 //
 // Throws error if snake is out of bounds.
 func handleKeyArrowsInput(g *Game) error {
-	keyDirections := map[ebiten.Key]Direction{
-		ebiten.KeyArrowUp:    UP,
-		ebiten.KeyArrowDown:  DOWN,
-		ebiten.KeyArrowLeft:  LEFT,
-		ebiten.KeyArrowRight: RIGHT,
-	}
 
 	for key, keyDirection := range keyDirections {
 		if inpututil.IsKeyJustPressed(key) {
-			g.snake.direction = keyDirection
-
-			break
+			if keyDirection != g.snake.direction && keyDirection != (g.snake.direction^1) {
+				g.snake.direction = keyDirection
+				break
+			}
 		}
 	}
 
@@ -54,7 +57,20 @@ func handleKeyArrowsInput(g *Game) error {
 		return errors.New("Snake is out of bounds, game is over")
 	}
 
+	if slices.Contains(g.snake.coords, newHead) {
+		return errors.New("Snake ate itself, game is over")
+	}
+
 	coordsWithoutTail := g.snake.coords[:len(g.snake.coords)-1]
 	g.snake.coords = append([]Coordinate{newHead}, coordsWithoutTail...)
 	return nil
+}
+
+func anyArrowKeyIsPressed() bool {
+	for key, _ := range keyDirections {
+		if inpututil.IsKeyJustPressed(key) {
+			return true
+		}
+	}
+	return false
 }

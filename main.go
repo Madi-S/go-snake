@@ -2,14 +2,19 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+// TODO: handle random food spawn
+
 type Game struct {
-	snake Snake
+	snake      Snake
+	lastUpdate time.Time
+	gameSpeed  time.Duration
 }
 
 func (g *Game) Update() error {
@@ -18,6 +23,14 @@ func (g *Game) Update() error {
 	if err := handleClose(); err != nil {
 		return err
 	}
+
+	if time.Since(g.lastUpdate) < g.gameSpeed {
+		if skip := anyArrowKeyIsPressed(); !skip {
+			return nil
+		}
+	}
+
+	g.lastUpdate = time.Now()
 
 	if err := handleKeyArrowsInput(g); err != nil {
 		return err
@@ -47,7 +60,7 @@ func setup() {
 	ebiten.SetCursorShape(ebiten.CursorShapeCrosshair)
 	ebiten.SetFullscreen(false)
 	ebiten.SetVsyncEnabled(true)
-	ebiten.SetTPS(2)
+	ebiten.SetTPS(120)
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetRunnableOnUnfocused(false)
 	ebiten.SetWindowClosingHandled(true)
@@ -66,6 +79,8 @@ func main() {
 			color:     yellowish,
 			direction: UP,
 		},
+		lastUpdate: time.Now(),
+		gameSpeed:  500 * time.Millisecond,
 	}
 	gameOptions := ebiten.RunGameOptions{
 		SkipTaskbar:       false,
