@@ -18,6 +18,7 @@ func (g *Game) Update() error {
 	if err := handleClose(); err != nil {
 		return err
 	}
+
 	if err := handleKeyArrowsInput(g); err != nil {
 		return err
 	}
@@ -46,7 +47,7 @@ func setup() {
 	ebiten.SetCursorShape(ebiten.CursorShapeCrosshair)
 	ebiten.SetFullscreen(false)
 	ebiten.SetVsyncEnabled(true)
-	ebiten.SetTPS(120)
+	ebiten.SetTPS(2)
 	ebiten.SetScreenClearedEveryFrame(true)
 	ebiten.SetRunnableOnUnfocused(false)
 	ebiten.SetWindowClosingHandled(true)
@@ -57,8 +58,13 @@ func main() {
 
 	game := Game{
 		snake: Snake{
-			coords: []Coordinate{{x: MAX_WIDTH/2/GRID_SIZE - 1, y: MAX_HEIGHT/2/GRID_SIZE - 1}},
-			color:  yellowish,
+			coords: []Coordinate{
+				{x: MAX_WIDTH/2/GRID_SIZE - 1, y: MAX_HEIGHT/2/GRID_SIZE - 1},
+				{x: MAX_WIDTH / 2 / GRID_SIZE, y: MAX_HEIGHT/2/GRID_SIZE - 1},
+				{x: MAX_WIDTH/2/GRID_SIZE + 1, y: MAX_HEIGHT/2/GRID_SIZE - 1},
+			},
+			color:     yellowish,
+			direction: UP,
 		},
 	}
 	gameOptions := ebiten.RunGameOptions{

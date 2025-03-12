@@ -22,29 +22,39 @@ func handleClose() error {
 //
 // Throws error if snake is out of bounds.
 func handleKeyArrowsInput(g *Game) error {
-	keyCoordDeltas := map[ebiten.Key]Coordinate{
-		ebiten.KeyArrowUp:    {0, -1},
-		ebiten.KeyArrowDown:  {0, 1},
-		ebiten.KeyArrowLeft:  {-1, 0},
-		ebiten.KeyArrowRight: {1, 0},
+	keyDirections := map[ebiten.Key]Direction{
+		ebiten.KeyArrowUp:    UP,
+		ebiten.KeyArrowDown:  DOWN,
+		ebiten.KeyArrowLeft:  LEFT,
+		ebiten.KeyArrowRight: RIGHT,
 	}
 
-	newCoord := g.snake.coords[0]
-
-	for key, coordDelta := range keyCoordDeltas {
+	for key, keyDirection := range keyDirections {
 		if inpututil.IsKeyJustPressed(key) {
-			newCoord.x += coordDelta.x
-			newCoord.y += coordDelta.y
+			g.snake.direction = keyDirection
 
-			factualX := newCoord.x * GRID_SIZE
-			factualY := newCoord.y * GRID_SIZE
-			if factualX >= MAX_WIDTH || factualX < 0 || factualY >= MAX_HEIGHT || factualY < 0 {
-				return errors.New("Snake is out of bounds, game is over")
-			}
 			break
 		}
 	}
 
-	g.snake.coords = append([]Coordinate{newCoord}, g.snake.coords...)
+	newHead := g.snake.coords[0]
+	switch g.snake.direction {
+	case UP:
+		newHead.y -= 1
+	case DOWN:
+		newHead.y += 1
+	case LEFT:
+		newHead.x -= 1
+	case RIGHT:
+		newHead.x += 1
+	}
+
+	factualX, factualY := newHead.x*GRID_SIZE, newHead.y*GRID_SIZE
+	if factualX >= MAX_WIDTH || factualX < 0 || factualY >= MAX_HEIGHT || factualY < 0 {
+		return errors.New("Snake is out of bounds, game is over")
+	}
+
+	coordsWithoutTail := g.snake.coords[:len(g.snake.coords)-1]
+	g.snake.coords = append([]Coordinate{newHead}, coordsWithoutTail...)
 	return nil
 }

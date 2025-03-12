@@ -14,3 +14,11 @@ const (
 	WELCOME_TEXT_X     int = (MAX_WIDTH - WELCOME_TEXT_WIDTH) / 2
 	WELCOME_TEXT_Y     int = 10
 )
+
+// Snake directions
+const (
+	UP    Direction = iota // 0
+	DOWN                   // 1
+	LEFT                   // 2
+	RIGHT                  // 3
+)
