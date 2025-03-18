@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // Resolution params
 const (
 	GRID_SIZE  int = 20
@@ -22,3 +24,6 @@ const (
 	LEFT                   // 2
 	RIGHT                  // 3
 )
+
+// Food params
+const FOOD_SPAWN_INTERVAL_SECONDS = 2 * time.Second

@@ -12,9 +12,11 @@ import (
 // TODO: handle random food spawn
 
 type Game struct {
-	snake      Snake
-	lastUpdate time.Time
-	gameSpeed  time.Duration
+	snake         Snake
+	foods         []Food
+	lastFoodSpawn time.Time
+	lastUpdate    time.Time
+	gameSpeed     time.Duration
 }
 
 func (g *Game) Update() error {
@@ -36,11 +38,19 @@ func (g *Game) Update() error {
 		return err
 	}
 
+	handleFoodSpawn(g)
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, WELCOME_TEXT, WELCOME_TEXT_X, WELCOME_TEXT_Y)
+	for _, food := range g.foods {
+		vector.DrawFilledRect(
+			screen, float32(food.coord.x*GRID_SIZE), float32(food.coord.y*GRID_SIZE),
+			float32(GRID_SIZE), float32(GRID_SIZE), food.color, true,
+		)
+	}
 	for _, c := range g.snake.coords {
 		vector.DrawFilledRect(
 			screen, float32(c.x*GRID_SIZE), float32(c.y*GRID_SIZE),
@@ -79,8 +89,9 @@ func main() {
 			color:     yellowish,
 			direction: UP,
 		},
-		lastUpdate: time.Now(),
-		gameSpeed:  500 * time.Millisecond,
+		lastUpdate:    time.Now(),
+		lastFoodSpawn: time.Now(),
+		gameSpeed:     500 * time.Millisecond,
 	}
 	gameOptions := ebiten.RunGameOptions{
 		SkipTaskbar:       false,

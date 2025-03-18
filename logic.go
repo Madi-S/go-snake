@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"slices"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -30,7 +31,6 @@ var keyDirections map[ebiten.Key]Direction = map[ebiten.Key]Direction{
 //
 // Throws error if snake is out of bounds.
 func handleKeyArrowsInput(g *Game) error {
-
 	for key, keyDirection := range keyDirections {
 		if inpututil.IsKeyJustPressed(key) {
 			if keyDirection != g.snake.direction && keyDirection != (g.snake.direction^1) {
@@ -61,16 +61,31 @@ func handleKeyArrowsInput(g *Game) error {
 		return errors.New("Snake ate itself, game is over")
 	}
 
-	coordsWithoutTail := g.snake.coords[:len(g.snake.coords)-1]
+	coordUntil := len(g.snake.coords) - 1
+	for i, food := range g.foods {
+		if newHead == food.coord {
+			coordUntil = len(g.snake.coords)
+			g.foods = append(g.foods[:i], g.foods[i+1:]...)
+			break
+		}
+	}
+
+	coordsWithoutTail := g.snake.coords[:coordUntil]
 	g.snake.coords = append([]Coordinate{newHead}, coordsWithoutTail...)
 	return nil
 }
 
-func anyArrowKeyIsPressed() bool {
-	for key, _ := range keyDirections {
-		if inpututil.IsKeyJustPressed(key) {
-			return true
+// Handles random food spawn
+func handleFoodSpawn(g *Game) {
+	if time.Since(g.lastFoodSpawn) > FOOD_SPAWN_INTERVAL_SECONDS {
+		foodX := generateRandomNumber(0, MAX_WIDTH) / GRID_SIZE
+		foodY := generateRandomNumber(0, MAX_HEIGHT) / GRID_SIZE
+		foodColor := yellowish
+		for foodColor == yellowish {
+			foodColor = colors[generateRandomNumber(0, len(colors)-1)]
 		}
+		newFood := Food{color: foodColor, coord: Coordinate{foodX, foodY}}
+		g.foods = append(g.foods, newFood)
+		g.lastFoodSpawn = time.Now()
 	}
-	return false
 }
